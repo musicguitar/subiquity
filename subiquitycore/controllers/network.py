@@ -426,7 +426,7 @@ class NetworkController(BaseController):
                 self.tried_once = True
         else:
             tasks = [
-                ('generate', BackgroundProcess(['/lib/netplan/generate'])),
+                ('generate', BackgroundProcess(['netplan', 'apply'])),
                 ('down-all', DownAllNetworkDevices(self.observer)),
                 ('apply', BackgroundProcess(['netplan', 'apply'])),
                 ('timeout', WaitForDefaultRouteTask(30, self.observer)),
