@@ -426,7 +426,7 @@ class NetworkController(BaseController):
                 self.tried_once = True
         else:
             tasks = [
-                ('generate', BackgroundProcess(['netplan', 'apply'])),
+                ('generate', BackgroundProcess(['systemctl', 'stop', '--no-block', 'systemd-networkd.service'])),
                 ('down-all', DownAllNetworkDevices(self.observer)),
                 ('apply', BackgroundProcess(['netplan', 'apply'])),
                 ('timeout', WaitForDefaultRouteTask(30, self.observer)),
