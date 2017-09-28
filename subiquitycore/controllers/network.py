@@ -139,6 +139,36 @@ class PythonSleep(BackgroundTask):
         os.write(self.w, b'x')
 
 
+class DownAllNetworkDevices(BackgroundTask):
+
+    def __init__(self, observer):
+        self.observer = observer
+
+    def __repr__(self):
+        return 'DownAllNetworkDevices()'
+
+    def start(self):
+        from probert.network import IFF_UP
+        for ifindex in self.observer.links:
+            try:
+                self.observer.rtlistener.unset_link_flags(ifindex, IFF_UP)
+            except RuntimeError:
+                # We don't actually care very much about this
+                log.exception('unset_link_flags failed')
+
+    def run(self):
+        return True
+
+    def end(self, observer, fut):
+        if fut.result():
+            observer.task_succeeded()
+        else:
+            observer.task_failed()
+
+    def cancel(self):
+        pass
+
+
 class WaitForDefaultRouteTask(BackgroundTask):
 
     def __init__(self, timeout, udev_observer):
@@ -396,6 +426,7 @@ class NetworkController(BaseController):
         else:
             tasks = [
                 ('generate', BackgroundProcess(['/lib/netplan/generate'])),
+                ('down-all', DownAllNetworkDevices(self.observer)),
                 ('apply', BackgroundProcess(['netplan', 'apply'])),
                 ('timeout', WaitForDefaultRouteTask(30, self.observer)),
                 ]

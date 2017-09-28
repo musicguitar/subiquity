@@ -264,6 +264,8 @@ class NetworkView(BaseView):
         elif action == 'timeout':
             self.error.set_text("Network configuration timed out; " + \
                                 "please verify your settings.")
+        elif action == 'down-all':
+            self.error.set_text("Downing all network interfaces failed.")
         elif action == 'canceled':
             self.error.set_text("Network configuration canceled.")
         else:
