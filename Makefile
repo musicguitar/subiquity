@@ -23,7 +23,8 @@ dryrun: probert
 	$(MAKE) ui-view DRYRUN="--dry-run --uefi"
 
 ui-view:
-	(PYTHONPATH=$(PYTHONPATH) bin/$(PYTHONSRC)-tui $(DRYRUN) $(MACHARGS))
+	(PYTHONPATH=$(PYTHONPATH) bin/$(PYTHONSRC)-tui $(DRYRUN) $(MACHARGS) --answers=examples/answers-partitions.yaml)
+	#(PYTHONPATH=$(PYTHONPATH) bin/$(PYTHONSRC)-tui $(DRYRUN) $(MACHARGS))
 
 ui-view-serial:
 	(TERM=att4424 PYTHONPATH=$(PYTHONPATH) bin/$(PYTHONSRC)-tui $(DRYRUN) --serial)
