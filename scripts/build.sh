@@ -1,0 +1,1 @@
+sudo ./scripts/inject-subiquity-snap.sh -c /home/darrenwu/workspace/projects/caracalla/ubuntu-server/18.04/subiquity/scripts/edit_initrd.sh ../image/live-subiquity/bionic-live-server-amd64.iso subiquity_test.snap ../image/live-subiquity/custom.iso
