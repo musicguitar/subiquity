@@ -20,7 +20,8 @@ install_deps:
 		python3-coverage python3-dev pkg-config libnl-genl-3-dev libnl-route-3-dev
 
 dryrun: probert
-	$(MAKE) ui-view DRYRUN="--dry-run --uefi"
+	#$(MAKE) ui-view DRYRUN="--dry-run --uefi"
+	$(MAKE) ui-view DRYRUN="--dry-run --uefi --answers examples/myanswers.yaml"
 
 ui-view:
 	(PYTHONPATH=$(PYTHONPATH) bin/$(PYTHONSRC)-tui $(DRYRUN) $(MACHARGS))

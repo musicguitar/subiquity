@@ -70,8 +70,44 @@ class FilesystemController(BaseController):
         footer = (_("Select available disks to format and mount"))
         self.ui.set_header(title)
         self.ui.set_footer(footer)
-        self.ui.set_body(FilesystemView(self.model, self))
-        if self.answers['guided']:
+        v = FilesystemView(self.model, self)
+        self.ui.set_body(v)
+        if isinstance(self.answers['manual'], list):
+            disks = {}
+            for config in self.answers['manual']:
+                if 'disk' in config['type'] and config['path'] is not None:
+                    disks[config['id']] = { "disk-path": config['path'], "parts":{} }
+                    #self.model.get_disk(config['path'])
+                    #v.click_disk(None, disks[disk_id])
+                    log.info("darren disk~~~~~ {}".format(disks))
+
+            for config in self.answers['manual']:
+                if 'partition' in config['type'] and 'device' in config:
+                    for d, v in disks.items():
+                        if d in config['device']:
+                            disks[d]["parts"].update({config['id']: {"number":config['number'], "size":config['size']}})
+                            if 'flag' in config:
+                                disks[d]["parts"][config['id']].update( {"flag":config['flag']} )
+
+                    #d = disks.get(config['device'])
+                    #d = {"parts" : config['id']}
+                    #part_id = config['id']
+                    #disk = disks.get(config['device'])
+                    #partitions[part_id] = config['device']
+                    #part = self.model.add_partition(disk=disk, partnum=1, size=UEFI_GRUB_SIZE_BYTES, flag='boot')
+                    #fs = self.model.add_filesystem(part, 'fat32')
+                    #self.model.add_mount(fs, '/boot/efi')
+                    log.info("darren partition~~~~~ {}".format(disks))
+
+            for config in self.answers['manual']:
+                if 'format' in config['type']:
+                    log.info("darren format~~~~~ {}".format(config['type']))
+            mounts = {}
+            for config in self.answers['manual']:
+                if 'mount' in config['type']:
+                    log.info("darren mount~~~~~ {}".format(config['type']))
+            self.finish()
+        elif self.answers['guided']:
             self.finish()
 
     def guided(self):

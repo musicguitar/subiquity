@@ -1,0 +1,29 @@
+Welcome:
+  lang: en_US
+Keyboard:
+  layout: us
+Network:
+  accept-default: yes
+Filesystem:
+  manual:
+    - {id: disk-0, type: disk, ptable: gpt, serial: QEMU_HARDDISK_QM00001, path: /dev/sdh,
+        model: QEMU_HARDDISK, preserve: true}
+    - {id: part-0, type: partition, device: disk-0, number: 0, size: 768MB, preserve: true}
+    - {id: part-1, type: partition, device: disk-0, number: 1, size: 256MB, flag: boot, preserve: true}
+    - {id: part-2, type: partition, device: disk-0, number: 2, size: 2.5G, preserve: true}
+    - {id: fs-0, type: format, fstype: fat32, volume: part-0, label: recovery, preserve: true}
+    - {id: fs-1, type: format, fstype: fat32, volume: part-1, label: ESP, preserve: true}
+    - {id: fs-2, type: format, fstype: ext4, volume: part-2, label: rootfs, preserve: true}
+    - {id: mount-2, type: mount, device: fs-2, path: /, preserve: true}
+    - {id: mount-1, type: mount, device: fs-1, path: /boot/efi, preserve: true}
+
+Identity:
+  realname: Ubuntu
+  username: ubuntu
+  hostname: ubuntu-server
+  # ubuntu
+  password: '$6$wdAcoXrU039hKYPd$508Qvbe7ObUnxoj15DRCkzC3qO7edjH0VV7BPNRDYK4QR8ofJaEEF2heacn0QgD.f8pO8SNp83XNdWG6tocBM1'
+InstallProgress:
+  reboot: yes
+
+
