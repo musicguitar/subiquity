@@ -20,7 +20,7 @@ from subiquitycore.controller import BaseController
 from subiquitycore.ui.dummy import DummyView
 from subiquitycore.ui.error import ErrorView
 
-from subiquity.models.filesystem import humanize_size
+from subiquity.models.filesystem import humanize_size, dehumanize_size
 from subiquity.ui.views import (
     BcacheView,
     DiskInfoView,
@@ -76,36 +76,49 @@ class FilesystemController(BaseController):
             disks = {}
             for config in self.answers['manual']:
                 if 'disk' in config['type'] and config['path'] is not None:
-                    disks[config['id']] = { "disk-path": config['path'], "parts":{} }
-                    #self.model.get_disk(config['path'])
-                    #v.click_disk(None, disks[disk_id])
-                    log.info("darren disk~~~~~ {}".format(disks))
+                    disks[config['id']] = {"disk-path": config['path'], "parts":{}}
 
             for config in self.answers['manual']:
                 if 'partition' in config['type'] and 'device' in config:
-                    for d, v in disks.items():
+                    for d, a in disks.items():
                         if d in config['device']:
-                            disks[d]["parts"].update({config['id']: {"number":config['number'], "size":config['size']}})
+                            disks[d]["parts"].update({config['id']: {"number":None, "size":None, "flag":None}})
+                            if 'number' in config:
+                                disks[d]["parts"][config['id']].update({"number":config['number']})
+                            if 'size' in config:
+                                disks[d]["parts"][config['id']].update({"size":config['size']})
                             if 'flag' in config:
-                                disks[d]["parts"][config['id']].update( {"flag":config['flag']} )
-
-                    #d = disks.get(config['device'])
-                    #d = {"parts" : config['id']}
-                    #part_id = config['id']
-                    #disk = disks.get(config['device'])
-                    #partitions[part_id] = config['device']
-                    #part = self.model.add_partition(disk=disk, partnum=1, size=UEFI_GRUB_SIZE_BYTES, flag='boot')
-                    #fs = self.model.add_filesystem(part, 'fat32')
-                    #self.model.add_mount(fs, '/boot/efi')
-                    log.info("darren partition~~~~~ {}".format(disks))
+                                disks[d]["parts"][config['id']].update({"flag":config['flag']})
 
             for config in self.answers['manual']:
                 if 'format' in config['type']:
-                    log.info("darren format~~~~~ {}".format(config['type']))
-            mounts = {}
+                    for d, parts in disks.items():
+                        for vol, attr in parts['parts'].items():
+                            if vol in config['volume']:
+                                disks[d]["parts"][vol].update({"format-id":config['id'], "fstype":None, "label":None})
+                                if 'fstype' in config:
+                                    disks[d]["parts"][vol].update({"fstype":config['fstype']})
+                                if 'label' in config:
+                                    disks[d]["parts"][vol].update({"label":config['label']})
+
             for config in self.answers['manual']:
                 if 'mount' in config['type']:
-                    log.info("darren mount~~~~~ {}".format(config['type']))
+                    for d, parts in disks.items():
+                        for vol, attr in parts['parts'].items():
+                            if attr['format-id'] in config['device']:
+                                disks[d]["parts"][vol].update({"mount-id":config['id'], "mount-path":None})
+                                if 'path' in config:
+                                    disks[d]["parts"][vol].update({"mount-path":config['path']})
+            
+            for d, parts in disks.items():
+                disk = self.model.get_disk(parts['disk-path'])
+                for vol, attr in parts['parts'].items():
+                    fs = None
+                    part = self.model.add_partition(disk=disk, partnum=attr['number'], size=dehumanize_size(attr['size']), flag=attr['flag'])
+                    if attr['fstype'] is not None:
+                        fs = self.model.add_filesystem(part, attr['fstype'])
+                    if fs is not None and 'mount-path' in attr:
+                        self.model.add_mount(fs, attr['mount-path'])
             self.finish()
         elif self.answers['guided']:
             self.finish()
